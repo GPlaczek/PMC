@@ -1,16 +1,15 @@
-# parametry zadania
-set X 1
-set Y 257
-set T2 5
-set res 0
-
-# kompilacja makra
-vcom -work upcounter -2002 -explicit ./upcounter.vhd
-
-vsim upcounter.counter
+vcom -work work -2002 -explicit ./upcounter.vhd
+vsim work.counter
 view wave -title counter
 view signals
 add wave *
-force reset 1 0, 0 10ns
-force clk 0 0, [expr [set $res {$res+$X}]] $T2 -r [expr {$T2*2}]
-run [expr {$Y *2*$T2}] ns
+
+set X 1
+set Y 257
+set T2 5
+set i 0
+
+for {set i $X} {$i < $Y} {incr i} {
+	force bus_in 10#[expr $X * $i] [expr $T2 * $i * 2] ns
+}
+run [expr $T2 * $Y * 2] ns
