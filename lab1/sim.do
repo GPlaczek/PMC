@@ -1,4 +1,4 @@
-vcom -work work -2002 -explicit ./upcounter.vhd
+vcom -work work -2002 -explicit ./lab1/upcounter.vhd
 vsim work.counter
 view wave -title counter
 view signals
