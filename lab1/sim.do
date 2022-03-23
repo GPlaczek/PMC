@@ -1,6 +1,6 @@
-vcom -work work -2002 -explicit ./lab1/upcounter.vhd
-vsim work.counter
-view wave -title counter
+vcom -work work -2002 -explicit ./dummy.vhd
+vsim work.dummy
+view wave -title dummy
 view signals
 add wave *
 
