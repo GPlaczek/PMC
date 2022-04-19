@@ -5,7 +5,7 @@ view signals
 add wave *
 
 set X 1
-set Y 520
+set Y 257
 set T2 5
 set i 0
 
