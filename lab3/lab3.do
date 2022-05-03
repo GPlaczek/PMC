@@ -3,4 +3,4 @@ vsim -voptargs=+acc work.reg_tb
 add wave *
 run [expr 1000] ns
 wave zoom full
-dataset save sim reg_tb.wlf
+dataset save sim nowy_reg_tb.wlf
