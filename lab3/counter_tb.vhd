@@ -8,7 +8,7 @@ end entity counter_tb;
 architecture behav of counter_tb is
  constant sim_time: time := 14808000 ns;
  constant clk_time: time := 100 ns;
- signal ce_tb, clk_tb, rst_tb, tc_tb, res_tb: std_logic := '0';
+ signal ce_tb, clk_tb, rst_tb, tc_tb: std_logic := '0';
  signal q_tb : std_logic_vector(23 downto 0);
 
 procedure clock_gen(signal s:out std_logic; period: delay_length) is
@@ -49,10 +49,9 @@ procedure get_ce(signal s:in std_logic; name: string:="ce ") is
     end if;
 end procedure;
 
-procedure reset(signal s1:out std_logic; signal s2:out std_logic) is
+procedure reset(signal s1:out std_logic) is
     begin
     s1 <= '1', '0' after 100 ns;
-    s2 <= '1', '0' after 100 ns;
 end procedure;
     
 procedure enable(signal s:out std_logic) is
@@ -66,12 +65,11 @@ begin
         ce => ce_tb,
         clk => clk_tb,
         rst => rst_tb,
-        tc => tc_tb,
-        res => res_tb,
-        q => q_tb
+        q => q_tb,
+        tc => tc_tb
     );
 	clock_gen(clk_tb, clk_time);
-	reset(rst_tb, res_tb);
+	reset(rst_tb);
 	enable(ce_tb);
 	get_period(tc_tb, "CLOCK: ");
 	get_ce(tc_tb, "CE: ");

@@ -9,14 +9,14 @@ entity counter is
 	clk: in std_logic;
 	rst: in std_logic; -- reset 
       	q: inout std_logic_vector(23 downto 0);
-	tc: out std_logic;
-	res: inout std_logic -- reset od przepelnienia
+	tc: out std_logic
 );
 end entity;
 
 architecture struct of counter is
  signal ceo: std_logic_vector(5 downto 0);
  signal reset: std_logic; -- reset -> rst or res
+ signal res: std_logic;
 
 begin
   tc <= '1' when q = x"148070" else '0';
