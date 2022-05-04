@@ -6,12 +6,17 @@ entity counter_tb is
 end entity counter_tb;
 
 architecture behav of counter_tb is
- constant sim_time: time := 14808000 ns;
+ constant sim_periods: integer := 148080;
  constant clk_time: time := 100 ns;
  signal ce_tb, clk_tb, rst_tb, tc_tb: std_logic := '0';
  signal q_tb : std_logic_vector(23 downto 0);
 
-procedure clock_gen(signal s:out std_logic; period: delay_length) is
+procedure set_rst(signal s:out std_logic; periods: integer) is
+    begin
+    s <= '1', '0' after clk_time * periods;
+end procedure;
+
+procedure clock_gen(signal s:out std_logic; period: time) is
     begin loop
     s <= '0', '1' after period/2;
     wait for period; end loop;
@@ -21,36 +26,31 @@ procedure set_ce(signal s:out std_logic) is
 	begin
 	s <= '1';
 end procedure;
-
-procedure set_rst(signal s:out std_logic) is
-    begin
-    s <= '1', '0' after clk_time;
-end procedure;
     
-procedure stop_after(t: delay_length) is
+procedure stop_after(t: integer) is
 	begin
-	wait for t; stop(2);
+	wait for t * clk_time; stop(2);
 end procedure;
 
-procedure get_clk(signal s:in std_logic; name: string) is
-    variable t1, t2: delay_length:=0 ns;
+procedure get_ceo_last_state(signal s:in std_logic; signal q:in std_logic_vector(23 downto 0)) is
+    variable t_start, t_stop: time;
+    begin
+    if rising_edge(s) then t_start:=now;
+    report "last state before reset: " & to_hex_string(q) severity Note;
+    wait until s='0';
+    t_stop:=now - t_start;
+    report "ceo: "& time'image(t_stop) severity Note;
+    end if;
+end procedure;
+
+procedure get_clk(signal s:in std_logic) is
+    variable t1, t2: time:=0 ns;
     begin
     if rising_edge(s) then t1:=now;
     wait until s='0';
     wait until s='1';
     t2:=now - t1;
-    report name & time'image(t2) severity Warning;
-    end if;
-end procedure;
-
-procedure get_ceo_last_state(signal s:in std_logic; signal q:in std_logic_vector(23 downto 0); name, message: string) is
-    variable t1, t2, t3: delay_length:=0 ns;
-    begin
-    if rising_edge(s) then t1:=now;
-    wait until s='0';
-    t2:=now - t1;
-    report name & time'image(t2) severity Warning;
-    report message & to_hex_string(q) severity Warning;
+    report "clk: " & time'image(t2) severity Note;
     end if;
 end procedure;
 
@@ -64,10 +64,10 @@ begin
         tc => tc_tb
     );
 	clock_gen(clk_tb, clk_time);
-	set_rst(rst_tb);
+	set_rst(rst_tb, 1);
 	set_ce(ce_tb);
-	get_clk(clk_tb,"Clk: ");
-	get_ceo_last_state(tc_tb, q_tb, "Ceo: ", "Last state: ");	
-	stop_after(sim_time);
+	get_clk(clk_tb);
+	get_ceo_last_state(tc_tb, q_tb);	
+	stop_after(sim_periods);
 		
 end architecture behav;
