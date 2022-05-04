@@ -17,10 +17,14 @@ procedure clock_gen(signal s:out std_logic; period: delay_length) is
     wait for period; end loop;
 end procedure;
 
-procedure set_pulse(signal s:out std_logic; t_high,t_low: delay_length) is
+procedure set_ce(signal s:out std_logic) is
+	begin
+	s <= '1';
+end procedure;
+
+procedure set_rst(signal s:out std_logic) is
     begin
-    s <= '1', '0' after t_high;
-    wait for (t_high+t_low);
+    s <= '1', '0' after clk_time;
 end procedure;
     
 procedure stop_after(t: delay_length) is
@@ -28,7 +32,7 @@ procedure stop_after(t: delay_length) is
 	wait for t; stop(2);
 end procedure;
 
-procedure get_period(signal s:in std_logic; name: string:="period ") is
+procedure get_clk(signal s:in std_logic; name: string) is
     variable t1, t2: delay_length:=0 ns;
     begin
     if rising_edge(s) then t1:=now;
@@ -39,24 +43,15 @@ procedure get_period(signal s:in std_logic; name: string:="period ") is
     end if;
 end procedure;
 
-procedure get_ce(signal s:in std_logic; name: string:="ce ") is
-    variable t1, t2: delay_length:=0 ns;
+procedure get_ceo_last_state(signal s:in std_logic; signal q:in std_logic_vector(23 downto 0); name, message: string) is
+    variable t1, t2, t3: delay_length:=0 ns;
     begin
     if rising_edge(s) then t1:=now;
     wait until s='0';
     t2:=now - t1;
     report name & time'image(t2) severity Warning;
+    report message & to_hex_string(q) severity Warning;
     end if;
-end procedure;
-
-procedure reset(signal s1:out std_logic) is
-    begin
-    s1 <= '1', '0' after 100 ns;
-end procedure;
-    
-procedure enable(signal s:out std_logic) is
-	begin
-	s <= '1';
 end procedure;
 
 begin
@@ -69,10 +64,10 @@ begin
         tc => tc_tb
     );
 	clock_gen(clk_tb, clk_time);
-	reset(rst_tb);
-	enable(ce_tb);
-	get_period(tc_tb, "CLOCK: ");
-	get_ce(tc_tb, "CE: ");
+	set_rst(rst_tb);
+	set_ce(ce_tb);
+	get_clk(clk_tb,"Clk: ");
+	get_ceo_last_state(tc_tb, q_tb, "Ceo: ", "Last state: ");	
 	stop_after(sim_time);
 		
 end architecture behav;
