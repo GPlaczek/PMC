@@ -12,7 +12,7 @@ generic(DIGIT: natural :=8);
  cntr_en: out std_logic;
  cntr_rst: out std_logic:='0';
  cntr_load: out std_logic:='0';
- edit_en_out: out std_logic:=0;
+ edit_en_out: out std_logic:='0'
  );
 
 end entity;
@@ -22,14 +22,17 @@ architecture beh1 of key_fsm_c is
 	signal c_state, n_state: state_type;
    
 begin
-	proc_fsm: process(c_state, right, left, up, down, center)
+	proc_fsm: process(clk, c_state, right, left, up, down, center)
 	variable pos: integer := 0; 
 	variable val: integer := 0;
 	variable vector: std_logic_vector(DIGIT*4-1 downto 0) := (others => '0');
  begin
+	if rising_edge(clk) then
 	case c_state is
 		when idle =>  
 			n_state <= idle;
+			cntr_rst <= '0';
+			cntr_load <= '0';
 		  	if right='1' then 
 				n_state <= start;
 			elsif down='1' then
@@ -54,6 +57,7 @@ begin
 		when load => 
 			n_state <= idle;
 			cntr_load <= '1';
+			cntr_en <= '0';
 			edit_en_out <= '0';
 			data_out <= vector;
 		when inc_v => 
@@ -74,6 +78,7 @@ begin
 			val:= to_integer(unsigned( vector((pos+1)*4-1 downto (pos)*4)));
 		when edit => 
 			edit_en_out <= '1';
+			cntr_en <= '0';
 			n_state <= edit;
 			--report "curr_val: " & to_hex_string(vector) severity Note;
 			if up='1' then
@@ -88,6 +93,7 @@ begin
 				n_state <= load;
 			end if; 
 	end case;
+	end if;
 end process;
 
 	proc_memory: process (clk,rst)
