@@ -77,7 +77,7 @@ BEGIN
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: entity work.key_fsm_c 
-        Generic MAP (D)
+        --Generic MAP (D)
         PORT MAP (
           clk => clk_in,
           rst => rst,
