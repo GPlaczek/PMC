@@ -3,7 +3,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.Numeric_Std.all;
-use std.env.all;
 
 entity key_fsm_c is
 generic(DIGIT: natural :=8);
@@ -11,10 +10,10 @@ generic(DIGIT: natural :=8);
  rst: in std_logic;
  left, right, up, down, center: in std_logic;
  data_out: out std_logic_vector(DIGIT*4-1 downto 0) := (others => '0');
- cntr_en: out std_logic:='0';
- cntr_rst: out std_logic:='0';
- cntr_load: out std_logic:='0';
- edit_en_out: out std_logic:='0'
+ cntr_en: out std_logic;
+ cntr_rst: out std_logic;
+ cntr_load: out std_logic;
+ edit_en_out: out std_logic
  );
 
 end entity;
@@ -45,7 +44,6 @@ begin
 	case c_state is
 		when idle =>  
 			edit_en <= '0';
-			--edit_en_out <= '0';			
 			cntr_rst <= '0';
 			cntr_load <= '0';
 		  	if right='1' then 
@@ -75,44 +73,14 @@ begin
 			cntr_load <= '1';
 		when inc_v => 
 			n_state <= edit;
-			--if unsigned(vector((pos+1)*4-1 downto (pos)*4)) < 9 then
-			--	vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(unsigned(vector((pos+1)*4-1 downto (pos)*4)) + 1);
-			--else 
-			--	vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(0,4));
-			--end if;
-			--val <= (val+1) mod 10;
-			--vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(val,4));
 		when dec_v => 
 			n_state <= edit;
-			--if unsigned(vector((pos+1)*4-1 downto (pos)*4)) > 0 then
-			--	vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(unsigned(vector((pos+1)*4-1 downto (pos)*4)) - 1);
-			--else 
-			--	vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(9,4));
-			--end if;
-			--val <= (val-1) mod 10;
-			--vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(val,4));
 		when inc_p => 
 			n_state <= edit;
-			--if pos < DIGIT - 1 then
-			--	pos <= pos + 1;
-			--else
-			--	pos <= 0;
-			--end if;
-			--pos <= (pos+1) mod DIGIT;
-			--val <= to_integer(unsigned( vector((pos+1)*4-1 downto (pos)*4)));
 		when dec_p => 
 			n_state <= edit;
-			--if pos > 0 then
-			--	pos <= pos - 1;
-			--else
-			--	pos <= DIGIT-1;
-			--end if;
-			--pos <= (pos-1) mod DIGIT;
-			--val <= to_integer(unsigned( vector((pos+1)*4-1 downto (pos)*4)));
 		when edit => 
 			edit_en <= '1';
-			--edit_en_out <= '1';			
-			--cntr_en <= '0';
 			if up='1' then
 				n_state <= inc_v;
 				inc_val <= '1';
@@ -134,10 +102,9 @@ begin
 		when others=>
 			n_state <= edit;
 	end case;
-	--end if;
 end process;
 
-	proc_memory: process (clk)
+	proc_memory: process (clk, rst)
 	begin
 		if rising_edge(clk) then
 			if (rst ='1') then 
@@ -146,16 +113,11 @@ end process;
 				c_state <= n_state;
 			end if;
 			
-			if (c_state = stop or c_state = edit) then
-				cntr_en <= '0';
-			elsif (c_state = start) then
-				cntr_en <= '1';
-			end if;
 			edit_en_out <= edit_en;
 
 			if (inc_pos = '1') then
 				--pos <= (pos+1) mod DIGIT;
-				if pos < 9 then
+				if pos < 7 then
 					pos <= pos + 1;
 				else
 					pos <= 0;
@@ -166,20 +128,15 @@ end process;
 				else
 					pos <= DIGIT-1;
 				end if;
-				--pos <= (pos-1) mod DIGIT;
 			end if;
 
 			if (inc_val = '1') then 
-				--val <= val mod 10;
-				--vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(val,4));
 				if unsigned(vector((pos+1)*4-1 downto (pos)*4)) < 9 then
 					vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(unsigned(vector((pos+1)*4-1 downto (pos)*4)) + 1);
 				else 
 					vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(0,4));
 				end if;
 			elsif (dec_val = '1') then
-				--val <= val mod 10;
-				--vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(to_unsigned(val,4));
 				if unsigned(vector((pos+1)*4-1 downto (pos)*4)) > 0 then
 					vector((pos+1)*4-1 downto (pos)*4) <= std_logic_vector(unsigned(vector((pos+1)*4-1 downto (pos)*4)) - 1);
 				else 
