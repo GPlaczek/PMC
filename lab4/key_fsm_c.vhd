@@ -9,7 +9,7 @@ generic(DIGIT: natural :=8);
  port (clk: in std_logic;
  rst: in std_logic;
  left, right, up, down, center: in std_logic;
- data_out: out std_logic_vector(DIGIT*4-1 downto 0) := (others => '0');
+ data_out: out std_logic_vector(DIGIT*4-1 downto 0);
  cntr_en: out std_logic;
  cntr_rst: out std_logic;
  cntr_load: out std_logic;
@@ -22,20 +22,24 @@ architecture beh1 of key_fsm_c is
 	type state_type is (start,reset,stop,idle,load,edit,inc_v,dec_v,inc_p,dec_p);
 	signal c_state, n_state: state_type;
 	signal vector: std_logic_vector(DIGIT*4-1 downto 0) := (others => '0');
+
 	signal pos: integer := 0;
 	signal val: integer := 0;
+
 	signal inc_val: std_logic := '0';
 	signal dec_val: std_logic := '0';
 	signal inc_pos: std_logic := '0';
 	signal dec_pos: std_logic := '0';
+
 	signal edit_en: std_logic := '0';
+	signal cntr_en_internal: std_logic := '0';
+	signal cntr_rst_internal: std_logic := '0';
    
 begin
 	proc_fsm: process(clk, c_state, right, left, up, down, center)
  begin
 	--if rising_edge(clk) then
 	n_state <= idle;
-	cntr_rst <= '0';
 	cntr_load <= '0';
 	inc_val <= '0';
 	dec_val <= '0';
@@ -43,8 +47,8 @@ begin
 	dec_pos <= '0';
 	case c_state is
 		when idle =>  
+			cntr_rst_internal <= '0';
 			edit_en <= '0';
-			cntr_rst <= '0';
 			cntr_load <= '0';
 		  	if right='1' then 
 				n_state <= start;
@@ -61,13 +65,13 @@ begin
 			end if;
 		when start => 
 			n_state <= idle;
-			cntr_en <= '1';
+			cntr_en_internal <= '1';
 		when reset => 
 			n_state <= idle;
-			cntr_rst <= '1';
+			cntr_rst_internal <= '1';
 		when stop => 
 			n_state <= idle;
-			cntr_en <= '0';
+			cntr_en_internal <= '0';
 		when load => 
 			n_state <= idle;
 			cntr_load <= '1';
@@ -80,6 +84,7 @@ begin
 		when dec_p => 
 			n_state <= edit;
 		when edit => 
+			cntr_en_internal <= '0';
 			edit_en <= '1';
 			if up='1' then
 				n_state <= inc_v;
@@ -107,7 +112,14 @@ end process;
 	proc_memory: process (clk, rst)
 	begin
 		if rising_edge(clk) then
+			cntr_en <= cntr_en_internal;
+			cntr_rst <= cntr_rst_internal;
 			if (rst ='1') then 
+				cntr_en <= '0';
+				cntr_rst <= '0';
+				-- cntr_load <= '0';
+				edit_en_out <= '0';
+				vector <= (others => '0');
 				c_state <= idle;
 			else
 				c_state <= n_state;
