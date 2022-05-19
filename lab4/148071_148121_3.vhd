@@ -1,4 +1,7 @@
--- Autorzy: Grzegorz Placzek 148071, Kamil Kaluzny 148121
+-- Institute: CAT PUT Poznan
+-- Create date: 18.05.2022
+-- Authors: Grzegorz Placzek 148071, Kamil Kaluzny 148121
+-- consulted with: Kacper Swiderski
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
