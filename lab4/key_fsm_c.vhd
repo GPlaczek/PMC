@@ -40,7 +40,6 @@ begin
  begin
 	--if rising_edge(clk) then
 	n_state <= idle;
-	cntr_load <= '0';
 	inc_val <= '0';
 	dec_val <= '0';
 	inc_pos <= '0';
@@ -48,7 +47,6 @@ begin
 	case c_state is
 		when idle =>  
 			cntr_rst_internal <= '0';
-			edit_en <= '0';
 			cntr_load <= '0';
 		  	if right='1' then 
 				n_state <= start;
@@ -73,19 +71,32 @@ begin
 			n_state <= idle;
 			cntr_en_internal <= '0';
 		when load => 
+			cntr_en_internal <= '0';
+			edit_en <= '0';
 			n_state <= idle;
 			cntr_load <= '1';
 		when inc_v => 
 			n_state <= edit;
+			edit_en <= '1';
+			cntr_load <= '0';
 		when dec_v => 
 			n_state <= edit;
+			edit_en <= '1';
+			cntr_load <= '0';
 		when inc_p => 
 			n_state <= edit;
+			edit_en <= '1';
+			cntr_rst_internal <= '0';
+			cntr_load <= '0';
 		when dec_p => 
 			n_state <= edit;
+			edit_en <= '1';
+			cntr_rst_internal <= '0';
+			cntr_load <= '0';
 		when edit => 
 			cntr_en_internal <= '0';
 			edit_en <= '1';
+			cntr_load <= '0';
 			if up='1' then
 				n_state <= inc_v;
 				inc_val <= '1';
